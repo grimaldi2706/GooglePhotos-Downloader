@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Página Flask</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Descarga fotos de Google Photos </h1>
+    <h3>Subir archivo de token (.json)</h3>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="archivo" accept=".json">
+        <button type="submit">Subir</button>
+    </form>
+</body>
+</html>
