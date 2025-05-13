@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, render_template, request
 from app.tools import *
+from app.get_api_google import *
 
 main = Blueprint('main', __name__)
 
@@ -14,3 +15,11 @@ def index():
         flash('Archivo subido exitosamente')
 
     return render_template('index.html')
+
+@main.route('/authGoogle', methods=['GET', 'POST'])
+def authGoogle():
+    return get_photos()
+
+@main.route('/createfile', methods=['GET', 'POST'])
+def createFile():
+    return safe_csv("hola")

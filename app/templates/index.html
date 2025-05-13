@@ -22,5 +22,18 @@
         <input type="file" name="archivo" accept=".json">
         <button type="submit">Subir</button>
     </form>
+
+
+    {% if photos %}
+  <h2>Últimas fotos:</h2>
+  {% for photo in photos %}
+    <div>
+      <p>{{ photo.filename }}</p>
+      <img src="{{ photo.url }}=w200-h200" alt="{{ photo.filename }}">
+    </div>
+  {% endfor %}
+{% endif %}
+
+
 </body>
 </html>
