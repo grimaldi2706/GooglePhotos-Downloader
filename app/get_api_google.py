@@ -7,6 +7,7 @@ from google.auth.transport.requests import Request  # type: ignore
 from googleapiclient.discovery import build  # type: ignore
 import requests
 from app.tools import *
+from flask import jsonify
 
 def get_credentials(scopes, service_name):
     creds = None
@@ -43,12 +44,11 @@ def get_service(service_type, version, scopes):
         print(f"Detalles del error: Scopes: {scopes}, Service Type: {service_type}, Version: {version}")
         return None
 
-def get_photos():
+def get_photos(year, month):
     photos_scopes = ['https://www.googleapis.com/auth/photoslibrary']
     service = get_service('photoslibrary', 'v1', photos_scopes)
     if service:
-        response = service.mediaItems().list(pageSize=20).execute()
-        items = response.get('mediaItems', [])
+        items = response_services(service,year,month)
         os.makedirs('download', exist_ok=True)
         media_ids_para_album = []
         for item in items:
@@ -56,16 +56,15 @@ def get_photos():
                 filename = item['filename']
                 mime_type = item.get('mimeType', '')
                 media_id = item['id']
-                return item
+                creationTime = item['mediaMetadata']['creationTime']
                 data_file = [
                     {
                         'filename': filename,
-                        'baseUrl': base_url,
                         'mimeType': mime_type,
-                        'media_id': media_id
+                        'creationTime': creationTime,
                     }
                 ]
-                print(f"filename: {filename}")
+                
                 safe_csv(data_file)
                 """
                 media_type = '=d' if 'image' in mime_type else '=dv' if 'video' in mime_type else ''
@@ -107,3 +106,44 @@ def safe_csv(data_file):
 
     print(f"Fila añadida al CSV: {ruta}")
     return "Fila guardada correctamente"
+
+def response_services(service,year,month):
+
+    if not service:
+        return []
+    
+    all_photos = []
+    next_page_token = None
+
+    #year = 2022
+    #month = 7
+
+    while True:
+        body = {
+            "pageSize": 100,
+            "filters": {
+                "dateFilter": {
+                    "dates": [
+                        {
+                            "year": year,
+                            "month": month
+                        }
+                    ]
+                }
+            }
+        }
+
+        if next_page_token:
+            body["pageToken"] = next_page_token
+
+        response = service.mediaItems().search(body=body).execute()
+
+        media_items = response.get('mediaItems', [])
+        all_photos.extend(media_items)
+
+        next_page_token = response.get('nextPageToken')
+        if not next_page_token:
+            break
+
+    #return jsonify({"count": len(all_photos)})
+    return all_photos

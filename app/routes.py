@@ -18,7 +18,7 @@ def index():
 
 @main.route('/authGoogle', methods=['GET', 'POST'])
 def authGoogle():
-    return get_photos()
+    return get_photos(2017, 5)
 
 @main.route('/createfile', methods=['GET', 'POST'])
 def createFile():

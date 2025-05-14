@@ -29,12 +29,10 @@ def savefile(request):
 
     # 3) Valida extensión y guarda
     if archivo and allowed_file(archivo.filename):
-        #filename = secure_filename(archivo.filename)
         filename = 'credentials.json'
         destino = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         archivo.save(destino)
         return True
-
     # 4) Si no pasó la validación de extensión
     return False
 
