@@ -44,11 +44,12 @@ def get_service(service_type, version, scopes):
         print(f"Detalles del error: Scopes: {scopes}, Service Type: {service_type}, Version: {version}")
         return None
 
-def get_photos(year, month):
+def get_photos(year):
     photos_scopes = ['https://www.googleapis.com/auth/photoslibrary']
     service = get_service('photoslibrary', 'v1', photos_scopes)
     if service:
-        items = response_services(service,year,month)
+        items = response_services(service,year)
+        #return items
         os.makedirs('download', exist_ok=True)
         media_ids_para_album = []
         for item in items:
@@ -84,7 +85,10 @@ def get_photos(year, month):
                         print(f"Error al descargar {filename}: {e}")
                 """
         #dd(photos)
-        photos = [{'filename': i['filename'], 'url': i['baseUrl']} for i in items]
+        if len(items) == 0:
+            photos = []
+        else:
+            photos = [{'filename': i['filename'], 'url': i['baseUrl']} for i in items]
         return render_template('index.html', photos=photos)
         #return "Servicio de Google Photos obtenido exitosamente."
     else:
@@ -107,16 +111,13 @@ def safe_csv(data_file):
     print(f"Fila añadida al CSV: {ruta}")
     return "Fila guardada correctamente"
 
-def response_services(service,year,month):
+def response_services(service,year):
 
     if not service:
         return []
     
     all_photos = []
     next_page_token = None
-
-    #year = 2022
-    #month = 7
 
     while True:
         body = {
@@ -125,8 +126,7 @@ def response_services(service,year,month):
                 "dateFilter": {
                     "dates": [
                         {
-                            "year": year,
-                            "month": month
+                            "year": year
                         }
                     ]
                 }

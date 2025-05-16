@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.tools import *
 from app.get_api_google import *
 
@@ -13,12 +13,12 @@ def index():
     saveFile = savefile(request)
     if(saveFile):
         flash('Archivo subido exitosamente')
-
     return render_template('index.html')
 
 @main.route('/authGoogle', methods=['GET', 'POST'])
 def authGoogle():
-    return get_photos(2017, 5)
+    year = request.form.get('year')
+    return get_photos(year)
 
 @main.route('/createfile', methods=['GET', 'POST'])
 def createFile():

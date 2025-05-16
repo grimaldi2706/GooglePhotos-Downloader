@@ -4,36 +4,58 @@
     <meta charset="UTF-8">
     <title>Mi Página Flask</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
+  </head>
 <body>
+  <div class="container">
     <h1>Descarga fotos de Google Photos </h1>
-    <h3>Subir archivo de token (.json)</h3>
+    {% if not photos %}
+      <h3>Subir archivo de token (.json)</h3>
+    {% endif %}
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul>
           {% for message in messages %}
-            <li>{{ message }}</li>
+            <i class="fa fa-check" style="color: green;"></i>
+            {{ message }}
           {% endfor %}
         </ul>
+        <ul>  
+          <form method="POST" action="{{ url_for('main.authGoogle') }}" enctype="multipart/form-data">
+            <input type="number" name="year" placeholder="Año a Descarga">
+            <button type="submit">Descargar</button>
+          </form>
+        </ul>
+      {% else %}
+        {% if not photos %}
+          <ul style="align-items: center;">
+            <li style="list-style: none; width: 100%;" class="text-center">
+              {% if photos %}
+              <form method="POST" enctype="multipart/form-data" style="display: inline-block;">
+              {% else %}
+              <form method="POST" action="{{ url_for('main.index') }}" enctype="multipart/form-data" style="display: inline-block;">  
+              {% endif %}
+                <input type="file" name="archivo" accept=".json" required>
+                <br>
+                <button type="submit">Subir</button>
+              </form>
+            </li>
+          </ul>
+         {% endif %}
       {% endif %}
     {% endwith %}
 
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="archivo" accept=".json">
-        <button type="submit">Subir</button>
-    </form>
-
-
-    {% if photos %}
+{% if photos %}
   <h2>Últimas fotos:</h2>
   {% for photo in photos %}
     <div>
       <p>{{ photo.filename }}</p>
       <img src="{{ photo.url }}=w200-h200" alt="{{ photo.filename }}">
     </div>
-  {% endfor %}
+  {% endfor %} 
 {% endif %}
-
-
+  </div>
 </body>
 </html>
