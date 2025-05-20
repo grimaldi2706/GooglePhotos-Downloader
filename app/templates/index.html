@@ -46,8 +46,8 @@
          {% endif %}
       {% endif %}
     {% endwith %}
-
-{% if photos %}
+{% if photos is not none %}
+{% if photos|length > 0 %}
   <h2>Últimas fotos:</h2>
   {% for photo in photos %}
     <div>
@@ -55,6 +55,10 @@
       <img src="{{ photo.url }}=w200-h200" alt="{{ photo.filename }}">
     </div>
   {% endfor %} 
+{% endif %}
+{% else %}
+<i class="fa fa-warning" style="color: red;"></i>
+No existen fotos para ese año
 {% endif %}
   </div>
 </body>

@@ -18,7 +18,16 @@ def index():
 @main.route('/authGoogle', methods=['GET', 'POST'])
 def authGoogle():
     year = request.form.get('year')
-    return get_photos(year)
+    data = get_photos(year)
+    #return data
+    if data[0]['response'] == 'success':
+        photos = data[0]['data']
+        return render_template('index.html', photos=photos)
+    elif data[0]['response'] == 'no_data':
+        flash(data[0]['data'])
+    else:
+        flash(data[0]['data'])
+    return render_template('index.html')
 
 @main.route('/createfile', methods=['GET', 'POST'])
 def createFile():

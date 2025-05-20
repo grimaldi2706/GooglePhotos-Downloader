@@ -49,25 +49,23 @@ def get_photos(year):
     service = get_service('photoslibrary', 'v1', photos_scopes)
     if service:
         items = response_services(service,year)
-        #return items
         os.makedirs('download', exist_ok=True)
         media_ids_para_album = []
         for item in items:
+                save_photo = safe_photo(item)
+                """
+                return save_photo
                 base_url = item['baseUrl']
                 filename = item['filename']
                 mime_type = item.get('mimeType', '')
                 media_id = item['id']
                 creationTime = item['mediaMetadata']['creationTime']
                 data_file = [
-                    {
-                        'filename': filename,
-                        'mimeType': mime_type,
-                        'creationTime': creationTime,
-                    }
+                    {'filename': filename,'mimeType': mime_type,'creationTime': creationTime,}
                 ]
                 
                 safe_csv(data_file)
-                """
+                
                 media_type = '=d' if 'image' in mime_type else '=dv' if 'video' in mime_type else ''
                 
                 if media_type:
@@ -84,15 +82,15 @@ def get_photos(year):
                     except Exception as e:
                         print(f"Error al descargar {filename}: {e}")
                 """
-        #dd(photos)
         if len(items) == 0:
-            photos = []
+            data = [{'cantidad':0, 'data':'No se han encontrado Fotos', 'response': 'no_data'}]
         else:
             photos = [{'filename': i['filename'], 'url': i['baseUrl']} for i in items]
-        return render_template('index.html', photos=photos)
-        #return "Servicio de Google Photos obtenido exitosamente."
+            data = [{'cantidad':len(photos), 'data':photos, 'response': 'success'}]
+        return data
     else:
-        return "Error al obtener el servicio de Google Photos.", 500
+        data = [{'cantidad':0, 'data':'Erro al obtener fotos', 'response': 'error'}]
+        return data
     
 def safe_csv(data_file):
     ruta = "download/files_download_data.csv"
@@ -147,3 +145,33 @@ def response_services(service,year):
 
     #return jsonify({"count": len(all_photos)})
     return all_photos
+
+def safe_photo(item):
+    os.makedirs('download', exist_ok=True)
+    media_ids_para_album = []
+    base_url = item['baseUrl']
+    filename = item['filename']
+    mime_type = item.get('mimeType', '')
+    media_id = item['id']
+    creationTime = item['mediaMetadata']['creationTime']
+    data_file = [
+        {'filename': filename,'mimeType': mime_type,'creationTime': creationTime,}
+    ]
+                
+    safe_csv(data_file)
+    media_type = '=d' if 'image' in mime_type else '=dv' if 'video' in mime_type else ''
+                
+    if media_type:
+        full_url = base_url + media_type
+        try:
+            r = requests.get(full_url)
+            if r.status_code == 200:
+                with open(os.path.join('download', filename), 'wb') as f:
+                    f.write(r.content)
+                print(f"Descargado: {filename}")
+                media_ids_para_album.append(media_id)
+            else:
+                print(f"Error al descargar {filename}: status {r.status_code}")   
+        except Exception as e:
+            print(f"Error al descargar {filename}: {e}")
+    return "Archivo guardado correctamente"
