@@ -124,7 +124,8 @@ def response_services(service,year):
                 "dateFilter": {
                     "dates": [
                         {
-                            "year": year
+                            "year": year,
+                            #"month": 11,
                         }
                     ]
                 }
@@ -154,21 +155,26 @@ def safe_photo(item):
     mime_type = item.get('mimeType', '')
     media_id = item['id']
     creationTime = item['mediaMetadata']['creationTime']
+    # Extraer año y mes de creationTime (formato: 'YYYY-MM-DDTHH:MM:SSZ')
+    year = creationTime[:4]
+    month = creationTime[5:7]
+    # Crear carpeta por año y mes
+    folder_path = os.path.join('download', year, month)
+    os.makedirs(folder_path, exist_ok=True)
+    # Guardar la ruta relativa en el CSV
     data_file = [
-        {'filename': filename,'mimeType': mime_type,'creationTime': creationTime,}
+        {'filename': filename, 'mimeType': mime_type, 'creationTime': creationTime, 'folder': f'{year}/{month}'}
     ]
-                
     safe_csv(data_file)
     media_type = '=d' if 'image' in mime_type else '=dv' if 'video' in mime_type else ''
-                
     if media_type:
         full_url = base_url + media_type
         try:
             r = requests.get(full_url)
             if r.status_code == 200:
-                with open(os.path.join('download', filename), 'wb') as f:
+                with open(os.path.join(folder_path, filename), 'wb') as f:
                     f.write(r.content)
-                print(f"Descargado: {filename}")
+                print(f"Descargado: {filename} en {folder_path}")
                 media_ids_para_album.append(media_id)
             else:
                 print(f"Error al descargar {filename}: status {r.status_code}")   
